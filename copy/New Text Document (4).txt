@@ -1,0 +1,117 @@
+ import java.awt.BorderLayout;
+    import java.awt.EventQueue;
+
+    import javax.swing.JFrame;
+    import javax.swing.JPanel;
+    import javax.swing.border.EmptyBorder;
+    import javax.swing.BoxLayout;
+    import javax.swing.JButton;
+    import javax.swing.JTextField;
+    import javax.swing.JComboBox;
+    import javax.swing.AbstractAction;
+    import java.awt.event.ActionEvent;
+    import javax.swing.Action;
+    import java.awt.event.ActionListener;
+
+
+    public class second_add extends JFrame {
+
+        private JPanel contentPane;
+        private JTextField txtTypeYourQuestion;
+        private JTextField txtQuestionWeight;
+        private JTextField txtEnter;
+        private JTextField txtEnter_1;
+        private JTextField txtValue;
+        private JTextField txtValue_1;
+        private final Action action = new SwingAction();
+
+        /**
+         * Launch the application.
+         */
+        public static void main(String[] args) {
+            EventQueue.invokeLater(new Runnable() {
+                public void run() {
+                    try {
+                        second_add frame = new second_add();
+                        frame.setVisible(true);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+
+        /**
+         * Create the frame.
+         */
+        public second_add() {
+            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            setBounds(100, 100, 450, 300);
+            contentPane = new JPanel();
+            contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+            setContentPane(contentPane);
+            contentPane.setLayout(null);
+
+            txtTypeYourQuestion = new JTextField();
+            txtTypeYourQuestion.setBounds(22, 11, 177, 20);
+            txtTypeYourQuestion.setText("Type your Question Here");
+            contentPane.add(txtTypeYourQuestion);
+            txtTypeYourQuestion.setColumns(10);
+
+            txtQuestionWeight = new JTextField();
+            txtQuestionWeight.setBounds(209, 11, 86, 20);
+            txtQuestionWeight.setText("Question weight");
+            contentPane.add(txtQuestionWeight);
+            txtQuestionWeight.setColumns(10);
+
+            txtEnter = new JTextField();
+            txtEnter.setBounds(22, 55, 86, 20);
+            txtEnter.setText("Enter . . .");
+            contentPane.add(txtEnter);
+            txtEnter.setColumns(10);
+
+            txtEnter_1 = new JTextField();
+            txtEnter_1.setText("Enter . . . ");
+            txtEnter_1.setBounds(22, 104, 86, 20);
+            contentPane.add(txtEnter_1);
+            txtEnter_1.setColumns(10);
+
+            txtValue = new JTextField();
+            txtValue.setText("Value . .");
+            txtValue.setBounds(118, 55, 51, 20);
+            contentPane.add(txtValue);
+            txtValue.setColumns(10);
+
+            txtValue_1 = new JTextField();
+            txtValue_1.setText("Value . .");
+            txtValue_1.setBounds(118, 104, 51, 20);
+            contentPane.add(txtValue_1);
+            txtValue_1.setColumns(10);
+
+            JButton btnFinish = new JButton("Finish");
+            btnFinish.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                }
+            });
+            btnFinish.setAction(action);
+            btnFinish.setBounds(335, 228, 89, 23);
+            contentPane.add(btnFinish);
+
+            JButton btnAddChoice = new JButton("Add choice");
+            btnAddChoice.setBounds(236, 228, 89, 23);
+            contentPane.add(btnAddChoice);
+
+            JButton btnAddQuestion = new JButton("Add question");
+            btnAddQuestion.setBounds(136, 228, 89, 23);
+            contentPane.add(btnAddQuestion);
+
+        }
+        private class SwingAction extends AbstractAction {
+            public SwingAction() {
+                putValue(NAME, "");
+                putValue(SHORT_DESCRIPTION, "Some short description");
+            }
+            public void actionPerformed(ActionEvent e) {
+            }
+        }
+    }

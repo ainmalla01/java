@@ -1,0 +1,94 @@
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JRadioButton;
+import javax.swing.JTextField;
+import javax.swing.AbstractAction;
+
+import java.awt.event.ActionEvent;
+
+import javax.swing.Action;
+import javax.swing.JTextArea;
+import java.awt.Font;
+import java.awt.event.ActionListener;
+
+
+public class first extends JFrame {
+
+private JPanel contentPane;
+private final Action action = new SwingAction();
+private final Action action_1 = new SwingAction();
+
+/**
+ * Launch the application.
+ */
+public static void main(String[] args) {
+    EventQueue.invokeLater(new Runnable() {
+        public void run() {
+            try {
+                first frame = new first();
+                frame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    });
+}
+
+/**
+ * Create the frame.
+ */
+public first() {
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setBounds(100, 100, 450, 300);
+    contentPane = new JPanel();
+    contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+    setContentPane(contentPane);
+    contentPane.setLayout(null);
+
+    JButton btnNext = new JButton("Next");
+    btnNext.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent arg0) {
+        }
+    });
+    btnNext.setAction(action_1);
+    btnNext.setBounds(257, 228, 55, 23);
+    contentPane.add(btnNext);
+
+    JButton btnExit = new JButton("Exit");
+    btnExit.setBounds(344, 228, 51, 23);
+    contentPane.add(btnExit);
+
+    JRadioButton rdbtnAdd = new JRadioButton("Add");
+    rdbtnAdd.setBounds(27, 80, 109, 23);
+    contentPane.add(rdbtnAdd);
+
+    JRadioButton rdbtnDelete = new JRadioButton("Delete");
+    rdbtnDelete.setBounds(27, 130, 109, 23);
+    contentPane.add(rdbtnDelete);
+
+    JRadioButton rdbtnEdit = new JRadioButton("Edit");
+    rdbtnEdit.setBounds(27, 180, 109, 23);
+    contentPane.add(rdbtnEdit);
+
+    JLabel lblSelectAnOption = new JLabel("Select an Option");
+    lblSelectAnOption.setFont(new Font("Tahoma", Font.PLAIN, 14));
+    lblSelectAnOption.setBounds(27, 36, 121, 23);
+    contentPane.add(lblSelectAnOption);
+}
+private class SwingAction extends AbstractAction {
+    public SwingAction() {
+        putValue(NAME, "Next");
+        putValue(SHORT_DESCRIPTION, "Some short description");
+    }
+    public void actionPerformed(ActionEvent e) {
+        new second_add();
+    }
+}
+}

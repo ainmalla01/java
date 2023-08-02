@@ -1,0 +1,405 @@
+import java.awt.BorderLayout;
+    import java.awt.Button;
+    import java.awt.CardLayout;
+    import java.awt.Container;
+    import java.awt.GraphicsEnvironment;
+    import java.awt.GridBagConstraints;
+    import java.awt.GridBagLayout;
+    import java.awt.GridLayout;
+    import java.awt.Insets;
+    import java.awt.Panel;
+    import java.awt.TextArea;
+    import java.awt.event.ActionEvent;
+    import java.awt.event.ActionListener;
+    import java.awt.event.WindowEvent;
+    import java.io.IOException;
+    import java.io.PipedInputStream;
+    import java.io.PipedOutputStream;
+    import java.io.PrintStream;
+    import java.util.ArrayList;
+
+    import javax.swing.JButton;
+    import javax.swing.JComboBox;
+    import javax.swing.JFrame;
+    import javax.swing.JLabel;
+    import javax.swing.JMenu;
+    import javax.swing.JMenuBar;
+    import javax.swing.JMenuItem;
+    import javax.swing.JOptionPane;
+    import javax.swing.JPanel;
+    import javax.swing.JPasswordField;
+    import javax.swing.JTextField;
+
+public class AddressBookDemo implements ActionListener, Runnable {
+
+    ArrayList personsList;
+    PersonDAO pDAO;
+    Panel panel;
+    JFrame appFrame;
+    JLabel jlbName, jblPassword, jlbAddress;
+    JPasswordField jPassword;
+    JTextField jtfName, jtfAddress;
+    JButton jbbSave, jbnClear, jbnExit, btnNext, button;
+    String name, address, password;
+    final int CARDS = 4;
+    CardLayout cl = new CardLayout();
+    JPanel cardPanel = new JPanel(cl);
+    CardLayout c2 = new CardLayout();
+    JPanel cardPanel2 = new JPanel(c2);
+    int currentlyShowing = 0;
+    Thread errorThrower; 
+    // int phone;
+    // int recordNumber; // used to naviagate using >> and buttons
+    Container cPane;
+    Container cPane2;
+
+    private JFrame frame;
+    private TextArea textArea;
+    private Thread reader;
+    private Thread reader2;
+    private boolean quit;
+
+    private final PipedInputStream pin = new PipedInputStream();
+    private final PipedInputStream pin2 = new PipedInputStream();
+    public static void main(String args[]) {
+        new AddressBookDemo();
+    }
+
+    public AddressBookDemo() {
+        name = "";
+        password = "";
+        address = "";
+        // phone = -1; //Stores 0 to indicate no Phone Number
+        // recordNumber = -1;
+        createGUI();
+        personsList = new ArrayList();
+        // creating PersonDAO object
+        pDAO = new PersonDAO();
+    }
+
+    public void createGUI() {
+
+        /* Create a frame, get its contentpane and set layout */
+        appFrame = new JFrame("ManualDeploy ");
+        cPane = appFrame.getContentPane();
+        cPane.setLayout(new GridBagLayout());
+//      frame=new JFrame("Java Console");
+        textArea=new TextArea();
+        textArea.setEditable(false);
+        Button button=new Button("clear");
+
+         panel=new Panel();
+        panel.setLayout(new GridBagLayout());
+        GridBagConstraints gridBagConstraintsx01 = new GridBagConstraints();
+        gridBagConstraintsx01.gridx = 0;
+        gridBagConstraintsx01.gridy = 0;
+        gridBagConstraintsx01.insets = new Insets(5, 5, 5, 5);
+        panel.add(textArea,gridBagConstraintsx01);
+        GridBagConstraints gridBagConstraintsx03 = new GridBagConstraints();
+        gridBagConstraintsx03.gridx = 0;
+        gridBagConstraintsx03.insets = new Insets(5, 5, 5, 5);
+        gridBagConstraintsx03.gridy = 1;
+        panel.add(button,gridBagConstraintsx03);
+//      frame.add(panel);
+
+//      frame.setVisible(true);     
+//      cPane2 = frame.getContentPane();
+//      cPane2.setLayout(new GridBagLayout());
+        button.addActionListener(this);
+
+        try
+        {
+            PipedOutputStream pout=new PipedOutputStream(this.pin);
+            System.setOut(new PrintStream(pout,true));  
+        } 
+        catch (java.io.IOException io)
+        {
+            textArea.append("Couldn't redirect STDOUT to this console\n"+io.getMessage());
+        }
+        catch (SecurityException se)
+        {
+            textArea.append("Couldn't redirect STDOUT to this console\n"+se.getMessage());
+        } 
+
+        try 
+        {
+            PipedOutputStream pout2=new PipedOutputStream(this.pin2);
+            System.setErr(new PrintStream(pout2,true));
+        } 
+        catch (java.io.IOException io)
+        {
+            textArea.append("Couldn't redirect STDERR to this console\n"+io.getMessage());
+        }
+        catch (SecurityException se)
+        {
+            textArea.append("Couldn't redirect STDERR to this console\n"+se.getMessage());
+        }       
+
+        quit=false; // signals the Threads that they should exit
+
+        // Starting two seperate threads to read from the PipedInputStreams             
+        //
+        reader=new Thread(this);
+        reader.setDaemon(true); 
+        reader.start(); 
+        //
+        reader2=new Thread(this);   
+        reader2.setDaemon(true);    
+        reader2.start();
+
+        // testing part
+        // you may omit this part for your application
+        // 
+        System.out.println("Hello World 2");
+        System.out.println("All fonts available to Graphic2D:\n");
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        String[] fontNames=ge.getAvailableFontFamilyNames();
+        for(int n=0;n<fontNames.length;n++)  System.out.println(fontNames[n]);      
+        // Testing part: simple an error thrown anywhere in this JVM will be printed on the Console
+        // We do it with a seperate Thread becasue we don't wan't to break a Thread used by the Console.
+        System.out.println("\nLets throw an error on this console");    
+        errorThrower=new Thread(this);
+        errorThrower.setDaemon(true);
+        errorThrower.start();
+
+
+
+        arrangeComponents();
+        // arrangeComponents2();
+        final int CARDS = 2;
+        final CardLayout cl = new CardLayout();
+        final JPanel cardPanel = new JPanel(cl);
+        JMenu menu = new JMenu("M");
+        for (int x = 0; x < CARDS; x++) {
+            final int SELECTION = x;
+            JPanel jp = new JPanel();
+            if (x == 0) {
+                jp.add(cPane);
+            } else if (x == 1) {
+                 jp.add(panel);
+            } else if (x == 2)
+                jp.add(new JButton("Panel 2"));
+            else
+                jp.add(new JComboBox(new String[] { "Panel 3" }));
+            cardPanel.add("" + SELECTION, jp);
+            JMenuItem menuItem = new JMenuItem("Show Panel " + x);
+            menuItem.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent ae) {
+                    currentlyShowing = SELECTION;
+                    cl.show(cardPanel, "" + SELECTION);
+                }
+            });
+            menu.add(menuItem);
+        }
+        JMenuBar menuBar = new JMenuBar();
+        menuBar.add(menu);
+
+        btnNext = new JButton("Next >>");
+
+        JButton btnPrev = new JButton("<< Previous");
+        JPanel p = new JPanel(new GridLayout(1, 2));
+        p.add(btnPrev);
+        p.add(btnNext);
+        btnNext.setVisible(false);
+        JFrame f = new JFrame();
+        f.getContentPane().add(cardPanel);
+        f.getContentPane().add(p, BorderLayout.SOUTH);
+        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        f.setSize(500, 500);
+        f.setLocationRelativeTo(null);
+        f.setJMenuBar(menuBar);
+        f.setVisible(true);
+        btnNext.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                if (currentlyShowing < CARDS - 1) {
+                    cl.next(cardPanel);
+                    currentlyShowing++;
+                }
+            }
+        });
+        btnPrev.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                if (currentlyShowing > 0) {
+                    cl.previous(cardPanel);
+                    currentlyShowing--;
+                }
+            }
+        });
+
+    }
+
+    public void arrangeComponents() {
+        jlbName = new JLabel("Username");
+        jblPassword = new JLabel("Password");
+        jlbAddress = new JLabel("Sftpserver");
+        jtfName = new JTextField(20);
+        jPassword = new JPasswordField(20);
+        jtfAddress = new JTextField(20);
+        jbbSave = new JButton("move sftp");
+        jbnClear = new JButton("Clear");
+        jbnExit = new JButton("Exit");
+        /* add all initialized components to the container */
+        GridBagConstraints gridBagConstraintsx01 = new GridBagConstraints();
+        gridBagConstraintsx01.gridx = 0;
+        gridBagConstraintsx01.gridy = 0;
+        gridBagConstraintsx01.insets = new Insets(5, 5, 5, 5);
+        cPane.add(jlbName, gridBagConstraintsx01);
+        GridBagConstraints gridBagConstraintsx02 = new GridBagConstraints();
+        gridBagConstraintsx02.gridx = 1;
+        gridBagConstraintsx02.insets = new Insets(5, 5, 5, 5);
+        gridBagConstraintsx02.gridy = 0;
+        gridBagConstraintsx02.gridwidth = 2;
+        gridBagConstraintsx02.fill = GridBagConstraints.BOTH;
+        cPane.add(jtfName, gridBagConstraintsx02);
+        GridBagConstraints gridBagConstraintsx03 = new GridBagConstraints();
+        gridBagConstraintsx03.gridx = 0;
+        gridBagConstraintsx03.insets = new Insets(5, 5, 5, 5);
+        gridBagConstraintsx03.gridy = 1;
+        cPane.add(jblPassword, gridBagConstraintsx03);
+        GridBagConstraints gridBagConstraintsx04 = new GridBagConstraints();
+        gridBagConstraintsx04.gridx = 1;
+        gridBagConstraintsx04.insets = new Insets(5, 5, 5, 5);
+        gridBagConstraintsx04.gridy = 1;
+        gridBagConstraintsx04.gridwidth = 2;
+        gridBagConstraintsx04.fill = GridBagConstraints.BOTH;
+        cPane.add(jPassword, gridBagConstraintsx04);
+        GridBagConstraints gridBagConstraintsx05 = new GridBagConstraints();
+        gridBagConstraintsx05.gridx = 0;
+        gridBagConstraintsx05.insets = new Insets(5, 5, 5, 5);
+        gridBagConstraintsx05.gridy = 2;
+        cPane.add(jlbAddress, gridBagConstraintsx05);
+        GridBagConstraints gridBagConstraintsx06 = new GridBagConstraints();
+        gridBagConstraintsx06.gridx = 1;
+        gridBagConstraintsx06.gridy = 2;
+        gridBagConstraintsx06.insets = new Insets(5, 5, 5, 5);
+        gridBagConstraintsx06.gridwidth = 2;
+        gridBagConstraintsx06.fill = GridBagConstraints.BOTH;
+        cPane.add(jtfAddress, gridBagConstraintsx06);
+        GridBagConstraints gridBagConstraintsx09 = new GridBagConstraints();
+        gridBagConstraintsx09.gridx = 0;
+        gridBagConstraintsx09.gridy = 4;
+        gridBagConstraintsx09.insets = new Insets(5, 5, 5, 5);
+        cPane.add(jbbSave, gridBagConstraintsx09);
+        GridBagConstraints gridBagConstraintsx10 = new GridBagConstraints();
+        gridBagConstraintsx10.gridx = 1;
+        gridBagConstraintsx10.gridy = 4;
+        gridBagConstraintsx10.insets = new Insets(5, 5, 5, 5);
+        cPane.add(jbnClear, gridBagConstraintsx10);
+        GridBagConstraints gridBagConstraintsx11 = new GridBagConstraints();
+        gridBagConstraintsx11.gridx = 2;
+        gridBagConstraintsx11.gridy = 4;
+        gridBagConstraintsx11.insets = new Insets(5, 5, 5, 5);
+        cPane.add(jbnExit, gridBagConstraintsx11);
+        jbbSave.addActionListener(this);
+        // jbnDelete.addActionListener(this);
+        jbnClear.addActionListener(this);
+        jbnExit.addActionListener(this);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        System.out.println("inside button123");
+        if (e.getSource() == jbbSave) {
+            savePerson();
+        } else if (e.getSource() == jbnClear) {
+            clear();
+        } else if (e.getSource() == jbnExit) {
+            System.exit(0);
+        }
+        else if (e.getSource() == button)
+        {
+            System.out.println("inside button");
+            textArea.setText(" ");
+        }
+    }
+
+    // Save the Person into the Address Book
+    public void savePerson() {
+        name = jtfName.getText();
+        password = jPassword.getText();
+        address = jtfAddress.getText();
+        if (name.equals("")) {
+            JOptionPane.showMessageDialog(null, "Please enter password",
+                    "ERROR", JOptionPane.ERROR_MESSAGE);
+        } else if (password != null && password.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Please enter password",
+                    "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
+
+        else {
+            btnNext.setVisible(true);
+            JOptionPane.showMessageDialog(null, "Person Saved");
+        }
+    }
+
+    public void clear() {
+        jtfName.setText("");
+        jPassword.setText("");
+        jtfAddress.setText("");
+        personsList.clear();
+    }
+
+    public synchronized void run()
+    {
+        try
+        {           
+            while (Thread.currentThread()==reader)
+            {
+                try { this.wait(100);}catch(InterruptedException ie) {}
+                if (pin.available()!=0)
+                {
+                    String input=this.readLine(pin);
+                    textArea.append(input);
+                }
+                if (quit) return;
+            }
+
+            while (Thread.currentThread()==reader2)
+            {
+                try { this.wait(100);}catch(InterruptedException ie) {}
+                if (pin2.available()!=0)
+                {
+                    String input=this.readLine(pin2);
+                    textArea.append(input);
+                }
+                if (quit) return;
+            }           
+        } catch (Exception e)
+        {
+            textArea.append("\nConsole reports an Internal error.");
+            textArea.append("The error is: "+e);            
+        }
+
+        // just for testing (Throw a Nullpointer after 1 second)
+//      if (Thread.currentThread()==errorThrower)
+//      {
+//          try { this.wait(1000); }catch(InterruptedException ie){}
+//          throw new NullPointerException("Application test: throwing an NullPointerException It should arrive at the console");
+//      }
+
+    }
+
+    public synchronized String readLine(PipedInputStream in) throws IOException
+    {
+        String input="";
+        do
+        {
+            int available=in.available();
+            if (available==0) break;
+            byte b[]=new byte[available];
+            in.read(b);
+            input=input+new String(b,0,b.length);                                                       
+        }while( !input.endsWith("\n") &&  !input.endsWith("\r\n") && !quit);
+        return input;
+    }   
+    public synchronized void windowClosed(WindowEvent evt)
+    {
+        quit=true;
+        this.notifyAll(); // stop all threads
+        try { reader.join(1000);pin.close();   } catch (Exception e){}      
+        try { reader2.join(1000);pin2.close(); } catch (Exception e){}
+        System.exit(0);
+    }       
+
+
+
+}

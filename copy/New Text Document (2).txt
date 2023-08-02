@@ -1,0 +1,11 @@
+
+Modify like this-
+
+JButton btnNext = new JButton("Next");
+btnNext.addActionListener(new ActionListener() {
+    public void actionPerformed(ActionEvent arg0) {
+        second_add second = new second_add();   
+        setVisible(false); // Hide current frame
+        second.setVisible(true);
+    }
+});
